@@ -11,7 +11,7 @@ who based it on [Minecraft Player Count Discord Bot](https://github.com/SpencerT
 
 It takes inspiration for how it works and looks from [discord-stock-ticker](https://github.com/rssnyder/discord-stock-ticker) by Riley Snyder
 
-![Example bot setup.](https://i.imgur.com/aDy2dpj.png)
+![Example bot setup.](https://imgbox.com/iVPxlKO4)
 
 ## How to use
 
