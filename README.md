@@ -25,8 +25,11 @@ Just follow these steps:
 
 For information on getting a bot token, follow the steps on [the Discord developer documentation.](https://discordapp.com/developers/docs/intro)
 
+Scope: Bot
+Bot Permissions: Manage Roles, Change Nickname.
+
 In your discord server, you must create three roles:
-1. Price Bot (name it whatever you want) and leave it the default color grey.  Toggle the "display separately from other online members" and place it higher than the two roles below.  Give your bot this role.
+1. Price Bot (name it whatever you want) and leave it the default color grey.  Toggle the "display separately from other online members" and place it higher than the two roles below.  IMPORTANT: Give your bot this role (or you will get a permissions error on starting the bot).
 2. tickers-red (exactly that) and make it color red (it must be below your Price Bot role).  No need to assign to your bot.
 3. tickers-green (exactly that) and make it color green (it must be below your Price Bot role).  No need to assign to your bot.
 

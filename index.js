@@ -1,4 +1,5 @@
 require('dotenv').config() // Load .env file
+require('log-timestamp')
 const axios = require('axios')
 const { Client, Intents } = require('discord.js')
 
@@ -12,131 +13,114 @@ const up = "\u2B08"
 const down = "\u2B0A"
 const mid = "\u22EF"
 
+var guild
 var lastPrice
 var currentPrice
 var arrow
+var red
+var green
+var member
 
-async function clearRoles () {
-  const guild = client.guilds.cache.get(`${process.env.SERVER_ID}`)
+async function getGuild() {
+  guild = client.guilds.cache.get(`${process.env.SERVER_ID}`)
   if(!guild) {
     try {
-      const guild = await client.guilds.fetch(`${process.env.SERVER_ID}`)
+      guild = await client.guilds.fetch(`${process.env.SERVER_ID}`)
     } catch (error) {
       return console.log(`Error while fetching the guild: `, error)
     }
-  }
-
-  const red = guild.roles.cache.find(role => role.name === 'tickers-red')
-  if(!red) {
-    try {
-      const red = await guild.roles.cache.find(role => role.name === 'tickers-red')
-    } catch (error) {
-      return console.log(`Error while fetching the role: `, error)
-    }
-  }
-
-  const green = guild.roles.cache.find(role => role.name === 'tickers-green')
-  if(!green) {
-    try {
-      const green = await guild.roles.cache.find(role => role.name === 'tickers-green')
-    } catch (error) {
-      return console.log(`Error while fetching the role: `, error)
-    }
-  }
-
-  const member = guild.members.cache.get(`${process.env.BOT_ID}`)
-  if(!member) {
-    try {
-      member = await guild.members.fetch(`${process.env.BOT_ID}`)
-    } catch (error) {
-      return console.log(`Error while fetching the member: `, error)
-    }
-  }
-
-  member.roles.remove(red) && member.roles.remove(green)
-}
-
-async function setRed () {
-  const guild = client.guilds.cache.get(`${process.env.SERVER_ID}`)
-  if(!guild) {
-    try {
-      const guild = await client.guilds.fetch(`${process.env.SERVER_ID}`)
-    } catch (error) {
-      return console.log(`Error while fetching the guild: `, error)
-    }
-  }
-
-  const red = guild.roles.cache.find(role => role.name === 'tickers-red')
-  if(!red) {
-    try {
-      const red = await guild.roles.cache.find(role => role.name === 'tickers-red')
-    } catch (error) {
-      return console.log(`Error while fetching the role: `, error)
-    }
-  }
-
-  const green = guild.roles.cache.find(role => role.name === 'tickers-green')
-  if(!green) {
-    try {
-      const green = await guild.roles.cache.find(role => role.name === 'tickers-green')
-    } catch (error) {
-      return console.log(`Error while fetching the role: `, error)
-    }
-  }
-
-  const member = guild.members.cache.get(`${process.env.BOT_ID}`)
-  if(!member) {
-    try {
-      member = await guild.members.fetch(`${process.env.BOT_ID}`)
-    } catch (error) {
-      return console.log(`Error while fetching the member: `, error)
-    }
-  }
-
-  if(red) {
-    member.roles.add(red) && member.roles.remove(green)
   }
 }
 
-async function setGreen () {
-  const guild = client.guilds.cache.get(`${process.env.SERVER_ID}`)
-  if(!guild) {
-    try {
-      const guild = await client.guilds.fetch(`${process.env.SERVER_ID}`)
-    } catch (error) {
-      return console.log(`Error while fetching the guild: `, error)
-    }
-  }
-
-  const red = guild.roles.cache.find(role => role.name === 'tickers-red')
+async function findRoles() {
+  red = guild.roles.cache.find(role => role.name === 'tickers-red')
   if(!red) {
     try {
-      const red = await guild.roles.cache.find(role => role.name === 'tickers-red')
+      red = await guild.roles.cache.find(role => role.name === 'tickers-red')
     } catch (error) {
       return console.log(`Error while fetching the role: `, error)
     }
   }
 
-  const green = guild.roles.cache.find(role => role.name === 'tickers-green')
+  green = guild.roles.cache.find(role => role.name === 'tickers-green')
   if(!green) {
     try {
-      const green = await guild.roles.cache.find(role => role.name === 'tickers-green')
+      green = await guild.roles.cache.find(role => role.name === 'tickers-green')
     } catch (error) {
       return console.log(`Error while fetching the role: `, error)
     }
   }
+}
 
-  const member = guild.members.cache.get(`${process.env.BOT_ID}`)
+async function getBOT() {
+  member = guild.members.cache.get(`${process.env.BOT_ID}`)
   if(!member) {
     try {
-      member = await guild.members.fetch(`${process.env.BOT_ID}`)
+      member = await guild.members.cache.get(`${process.env.BOT_ID}`)
     } catch (error) {
-      return console.log(`Error while fetching the member: `, error)
+        return console.log(`Error while fetching the member: `, error)
+      }
+  }
+}
+
+async function clearRoles() {
+  let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  if (redRole) {
+    try {
+      await (member.roles.remove(red))
+    } catch (error) {
+      console.log('red role still present', error)
     }
   }
+  let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+  if (greenRole) {
+    try {
+      await (member.roles.remove(green))
+    } catch (error) {
+      console.log('green role still present', error)
+    }
+  }
+}
+  
+async function setRed() {
+  let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  if (!redRole) {
+    try {
+      await (member.roles.add(red))
+    } catch (error) {
+      console.log('RED but red role missing', error)
+    }
+  }
+  let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+  if (greenRole) {
+    try {
+      await (member.roles.remove(green))
+    } catch (error) {
+      console.log('RED but green role still present', error)
+    }
+  }
+}
 
-  if(green) {
-    member.roles.add(green) && member.roles.remove(red)
+async function setGreen() {
+  member.roles.remove(red) && member.roles.add(green)
+  }
+
+async function setGreen() {
+  let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  if (redRole) {
+    try {
+      await (member.roles.remove(red))
+    } catch (error) {
+      console.log('GREEN but red role still present', error)
+    }
+  }
+  let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+  if (!greenRole) {
+    try {
+      await (member.roles.add(green))
+    } catch (error) {
+      console.log('GREEN but green role missing', error)
+    }
   }
 }
 
@@ -159,8 +143,8 @@ function getInitialPrice() {
         arrow = mid
         client.guilds.cache.find(guild => guild.id === process.env.SERVER_ID).me.setNickname(`${symbol.toUpperCase()} ${arrow} ${process.env.CURRENCY_SYMBOL}${lastPrice}`)
 
-    //console.log('Initial price to', lastPrice)
-    //console.log('priceChange 24h is', priceChange)
+    console.log('Initial price to', lastPrice)
+    console.log('priceChange 24h is', priceChange)
     //console.log('symbol is', symbol)
     }
     else
@@ -185,26 +169,26 @@ function getPrices() {
         })
 
       if (currentPrice > lastPrice) {
-        //console.log('up')
+        console.log('up')
         arrow = up
         setGreen()
         } else if (currentPrice < lastPrice) {
-          //console.log('down')
+          console.log('down')
           arrow = down
           setRed()
         } else {
-          //console.log('same')
+          console.log('same')
         }
 
         client.guilds.cache.find(guild => guild.id === process.env.SERVER_ID).me.setNickname(`${symbol.toUpperCase()} ${arrow} ${process.env.CURRENCY_SYMBOL}${currentPrice}`)
-        //console.log('Current price to', lastPrice)
-        //console.log('priceChange 24h is', priceChange)
+        console.log('Current price to', lastPrice)
+        console.log('priceChange 24h is', priceChange)
 
         lastPrice = currentPrice
 
     }
     else
-      console.log('Could not load player count data for', process.env.COIN_ID)
+      console.log('Could not load coin data for', process.env.COIN_ID)
 
   }).catch(err => console.log('Error at api.coingecko.com data:', err))
 }
@@ -212,6 +196,10 @@ function getPrices() {
 // Runs when client connects to Discord.
 client.on('ready', () => {
   console.log('Logged in as', client.user.tag)
+  getGuild()
+  getBOT()
+  findRoles()
+  clearRoles()
   getInitialPrice() // Ping server once on startup
   // Ping the server and set the new status message every x minutes. (Minimum of 1 minute)
   setInterval(getPrices, Math.max(1, process.env.UPDATE_FREQUENCY || 1) * 60 * 1000)
