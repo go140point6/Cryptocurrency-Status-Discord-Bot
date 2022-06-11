@@ -102,10 +102,6 @@ async function setRed() {
 }
 
 async function setGreen() {
-  member.roles.remove(red) && member.roles.add(green)
-  }
-
-async function setGreen() {
   let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
   if (redRole) {
     try {
