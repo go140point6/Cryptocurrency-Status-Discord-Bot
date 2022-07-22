@@ -55,42 +55,60 @@ async function clearRoles() {
 }
 
 async function setRed() {
+  console.log('Setting Red Role Now...')
   await getStuff()
   let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+  console.log('redRole is:', redRole)
   let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
+  console.log('greenRole is:', greenRole)
   if (!redRole) {
+    console.log ('redRole is false, so add...')
     try {
       await (member.roles.add(red))
+      let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+      console.log ('Attempted adding of redRole, if successful, this should be true:', redRole)
     } catch (err) {
-      console.log('Unable to add RED role ', err)
+      console.log('Unable to add RED role', err)
       }
+  }
   if (greenRole) {
+    console.log ('greenRole is true, so remove...')
     try {
       await (member.roles.remove(green))
+      let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
+      console.log ('Attempted removal of greenRole, if successful, this should be false:', greenRole)
     } catch (err) {
-      console.log('Unable to remove GREEN role ', err)
+      console.log('Unable to remove GREEN role', err)
       }
     }
-  }
 }
 
 async function setGreen() {
+  console.log('Setting Green Role Now...')
   await getStuff()
   let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+  console.log('redRole is:', redRole)
   let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
+  console.log('greenRole is:', greenRole)
   if (redRole) {
+    console.log ('redRole is true, so remove...')
     try {
       await (member.roles.remove(red))
+      let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+      console.log ('Attempted removal of redRole, if successful, this should be false:', redRole)
     } catch (err) {
-      console.log('Unable to remove RED role ', err)
+      console.log('Unable to remove RED role', err)
       }
+  }
   if (!greenRole) {
+    console.log ('greenRole is false, so add...')
     try {
-      await (member.roles.add(green))
+      await member.roles.add(green)
+      let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
+      console.log ('Attempted adding of greenRole, if successful, this should be true:', greenRole)
     } catch (err) {
-      console.log('Unable to add GREEN role ', err)
+      console.log('Unable to add GREEN role', err)
       }
-    }
   }
 }
 
@@ -114,7 +132,7 @@ function getInitialPrice() {
         client.guilds.cache.find(guild => guild.id === process.env.SERVER_ID).me.setNickname(`${symbol.toUpperCase()} ${arrow} ${process.env.CURRENCY_SYMBOL}${lastPrice}`)
 
     console.log('Initial price to', lastPrice)
-    console.log('priceChange 24h is', priceChange)
+    //console.log('priceChange 24h is', priceChange)
     //console.log('symbol is', symbol)
     }
     else
@@ -152,7 +170,7 @@ function getPrices() {
 
         client.guilds.cache.find(guild => guild.id === process.env.SERVER_ID).me.setNickname(`${symbol.toUpperCase()} ${arrow} ${process.env.CURRENCY_SYMBOL}${currentPrice}`)
         console.log('Current price to', lastPrice)
-        console.log('priceChange 24h is', priceChange)
+        //console.log('priceChange 24h is', priceChange)
 
         lastPrice = currentPrice
 
