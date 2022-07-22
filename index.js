@@ -21,101 +21,75 @@ var red
 var green
 var member
 
-async function getGuild() {
-  guild = client.guilds.cache.get(`${process.env.SERVER_ID}`)
-  if(!guild) {
-    try {
-      guild = await client.guilds.fetch(`${process.env.SERVER_ID}`)
-    } catch (error) {
-      return console.log(`Error while fetching the guild: `, error)
-    }
-  }
+async function getStuff() {
+  guild = await client.guilds.cache.get(`${process.env.SERVER_ID}`)
+  //console.log(guild)
+  member = await guild.members.cache.get(`${process.env.BOT_ID}`)
+  //console.log(member)
+  red = await guild.roles.cache.find(role => role.name === 'tickers-red')
+  //console.log(red)
+  green = await guild.roles.cache.find(role => role.name === 'tickers-green')
+  //console.log(green)
 }
 
-async function findRoles() {
-  red = guild.roles.cache.find(role => role.name === 'tickers-red')
-  if(!red) {
+async function clearRoles() {
+  await getStuff()
+  let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+  let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
+  //console.log(redRole)
+  //console.log(greenRole)
+  if (redRole) {
     try {
-      red = await guild.roles.cache.find(role => role.name === 'tickers-red')
-    } catch (error) {
-      return console.log(`Error while fetching the role: `, error)
-    }
+      await (member.roles.remove(red))
+    } catch (err) {
+      console.log('Unable to clear RED role ', err)
+      }
   }
-
-  green = guild.roles.cache.find(role => role.name === 'tickers-green')
-  if(!green) {
+  if (greenRole) {
     try {
-      green = await guild.roles.cache.find(role => role.name === 'tickers-green')
-    } catch (error) {
-      return console.log(`Error while fetching the role: `, error)
-    }
-  }
-}
-
-async function getBOT() {
-  member = guild.members.cache.get(`${process.env.BOT_ID}`)
-  if(!member) {
-    try {
-      member = await guild.members.cache.get(`${process.env.BOT_ID}`)
-    } catch (error) {
-        return console.log(`Error while fetching the member: `, error)
+      await (member.roles.remove(green))
+    } catch (err) {
+      console.log('Unable to clear GREEN role ', err)
       }
   }
 }
 
-async function clearRoles() {
-  let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
-  if (redRole) {
-    try {
-      await (member.roles.remove(red))
-    } catch (error) {
-      console.log('red role still present', error)
-    }
-  }
-  let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
-  if (greenRole) {
-    try {
-      await (member.roles.remove(green))
-    } catch (error) {
-      console.log('green role still present', error)
-    }
-  }
-}
-  
 async function setRed() {
-  let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  await getStuff()
+  let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+  let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
   if (!redRole) {
     try {
       await (member.roles.add(red))
-    } catch (error) {
-      console.log('RED but red role missing', error)
-    }
-  }
-  let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+    } catch (err) {
+      console.log('Unable to add RED role ', err)
+      }
   if (greenRole) {
     try {
       await (member.roles.remove(green))
-    } catch (error) {
-      console.log('RED but green role still present', error)
+    } catch (err) {
+      console.log('Unable to remove GREEN role ', err)
+      }
     }
   }
 }
 
 async function setGreen() {
-  let redRole = member.roles.cache.some(role => role.name === ('tickers-red'))
+  await getStuff()
+  let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+  let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
   if (redRole) {
     try {
       await (member.roles.remove(red))
-    } catch (error) {
-      console.log('GREEN but red role still present', error)
-    }
-  }
-  let greenRole = member.roles.cache.some(role => role.name === ('tickers-green'))
+    } catch (err) {
+      console.log('Unable to remove RED role ', err)
+      }
   if (!greenRole) {
     try {
       await (member.roles.add(green))
-    } catch (error) {
-      console.log('GREEN but green role missing', error)
+    } catch (err) {
+      console.log('Unable to add GREEN role ', err)
+      }
     }
   }
 }
@@ -192,10 +166,6 @@ function getPrices() {
 // Runs when client connects to Discord.
 client.on('ready', () => {
   console.log('Logged in as', client.user.tag)
-  getGuild()
-  getBOT()
-  findRoles()
-  clearRoles()
   getInitialPrice() // Ping server once on startup
   // Ping the server and set the new status message every x minutes. (Minimum of 1 minute)
   setInterval(getPrices, Math.max(1, process.env.UPDATE_FREQUENCY || 1) * 60 * 1000)
