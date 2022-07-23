@@ -34,87 +34,43 @@ async function getStuff() {
 
 async function clearRoles() {
   await getStuff()
-  let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
-  let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
-  //console.log(redRole)
-  //console.log(greenRole)
-  if (redRole) {
-    try {
-      await (member.roles.remove(red))
-    } catch (err) {
-      console.log('Unable to clear RED role ', err)
-      }
-  }
-  if (greenRole) {
-    try {
-      await (member.roles.remove(green))
-    } catch (err) {
-      console.log('Unable to clear GREEN role ', err)
-      }
-  }
+  await member.roles.remove(red)
+  await member.roles.remove(green)
 }
 
-async function setRed() {
+async function setRed() { 
   console.log('Setting Red Role Now...')
   await getStuff()
+  await clearRoles()
+  await member.roles.add(red)
   let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
-  console.log('redRole is:', redRole)
-  let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
-  console.log('greenRole is:', greenRole)
+  console.log ('Attempted adding of redRole, if successful, this should be true:', redRole)
   if (!redRole) {
-    console.log ('redRole is false, so add...')
-    try {
-      await (member.roles.add(red))
-      let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
-      console.log ('Attempted adding of redRole, if successful, this should be true:', redRole)
-    } catch (err) {
-      console.log('Unable to add RED role', err)
-      }
+     console.log ('ERROR, still showing false for redRole... trying again...')
+     await (member.roles.add(red))
+     let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
+     console.log ('Attempted 2nd adding of redRole, if successful, this should be true:', redRole)
   }
-  if (greenRole) {
-    console.log ('greenRole is true, so remove...')
-    try {
-      await (member.roles.remove(green))
-      let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
-      console.log ('Attempted removal of greenRole, if successful, this should be false:', greenRole)
-    } catch (err) {
-      console.log('Unable to remove GREEN role', err)
-      }
-    }
 }
 
 async function setGreen() {
   console.log('Setting Green Role Now...')
   await getStuff()
-  let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
-  console.log('redRole is:', redRole)
+  await clearRoles()
+  await member.roles.add(green)
   let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
-  console.log('greenRole is:', greenRole)
-  if (redRole) {
-    console.log ('redRole is true, so remove...')
-    try {
-      await (member.roles.remove(red))
-      let redRole = await member.roles.cache.some(role => role.name === ('tickers-red'))
-      console.log ('Attempted removal of redRole, if successful, this should be false:', redRole)
-    } catch (err) {
-      console.log('Unable to remove RED role', err)
-      }
-  }
+  console.log ('Attempted adding of greenRole, if successful, this should be true:', greenRole)
   if (!greenRole) {
-    console.log ('greenRole is false, so add...')
-    try {
-      await member.roles.add(green)
-      let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
-      console.log ('Attempted adding of greenRole, if successful, this should be true:', greenRole)
-    } catch (err) {
-      console.log('Unable to add GREEN role', err)
-      }
+     console.log ('ERROR, still showing false for greenRole... trying again...')
+     await (member.roles.add(green))
+     let greenRole = await member.roles.cache.some(role => role.name === ('tickers-green'))
+     console.log ('Attempted 2nd adding of greenRole, if successful, this should be true:', greenRole)
   }
 }
 
-function getInitialPrice() {
+async function getInitialPrice() {
   //API for price data
-  axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${process.env.PREFERRED_CURRENCY}&ids=${process.env.COIN_ID}`).then(res => {
+  await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${process.env.PREFERRED_CURRENCY}&ids=${process.env.COIN_ID}`).then(res => {
     // If we got a valid response
     if(res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h) {
       clearRoles()
@@ -141,9 +97,9 @@ function getInitialPrice() {
   }).catch(err => console.log('Error at api.coingecko.com data:', err))
 }
 
-function getPrices() {
+async function getPrices() {
   //API for price data
-  axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${process.env.PREFERRED_CURRENCY}&ids=${process.env.COIN_ID}`).then(res => {
+  await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${process.env.PREFERRED_CURRENCY}&ids=${process.env.COIN_ID}`).then(res => {
     // If we got a valid response
     if(res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h) {
       currentPrice = res.data[0].current_price.toFixed(4) || 0 // Default to zero
@@ -156,9 +112,12 @@ function getPrices() {
           }]
         })
 
+      console.log('The lastPrice:', lastPrice)
+      console.log('The currentPrice:', currentPrice)
       if (currentPrice > lastPrice) {
         console.log('up')
         arrow = up
+        
         setGreen()
         } else if (currentPrice < lastPrice) {
           console.log('down')
@@ -169,7 +128,7 @@ function getPrices() {
         }
 
         client.guilds.cache.find(guild => guild.id === process.env.SERVER_ID).me.setNickname(`${symbol.toUpperCase()} ${arrow} ${process.env.CURRENCY_SYMBOL}${currentPrice}`)
-        console.log('Current price to', lastPrice)
+        //console.log('Current price to', currentPrice)
         //console.log('priceChange 24h is', priceChange)
 
         lastPrice = currentPrice
