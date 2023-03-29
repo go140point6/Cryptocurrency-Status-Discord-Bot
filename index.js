@@ -70,13 +70,18 @@ async function setGreen() {
 
 async function getInitialPrice() {
   //API for price data
-  await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${process.env.PREFERRED_CURRENCY}&ids=${process.env.COIN_ID}`).then(res => {
+  await axios.get(`https://api.coingecko.com/api/v3/coins/${process.env.COIN_ID}`).then(res => {
     // If we got a valid response
-    if(res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h) {
+    if(res.data && res.data.market_data.current_price.usd && res.data.market_data.price_change_percentage_24h) {
+      //if(res.data) {
+      //console.log(res.data.market_data)
+      console.log(res.data.symbol)
+      console.log(res.data.market_data.current_price.usd)
+      console.log(res.data.market_data.price_change_percentage_24h)
       clearRoles()
-      lastPrice = res.data[0].current_price.toFixed(4) || 0 // Default to zero
-      let priceChange = res.data[0].price_change_percentage_24h || 0 // Default to zero
-      let symbol = res.data[0].symbol || '?'
+      lastPrice = res.data.market_data.current_price.usd.toFixed(4) || 0 // Default to zero
+      let priceChange = res.data.market_data.price_change_percentage_24h || 0 // Default to zero
+      let symbol = res.data.symbol || '?'
       client.user.setPresence({
         activities: [{
           name: `24hr: ${priceChange.toFixed(2)}%`,
@@ -99,12 +104,12 @@ async function getInitialPrice() {
 
 async function getPrices() {
   //API for price data
-  await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${process.env.PREFERRED_CURRENCY}&ids=${process.env.COIN_ID}`).then(res => {
+  await axios.get(`https://api.coingecko.com/api/v3/coins/${process.env.COIN_ID}`).then(res => {
     // If we got a valid response
-    if(res.data && res.data[0].current_price && res.data[0].price_change_percentage_24h) {
-      currentPrice = res.data[0].current_price.toFixed(4) || 0 // Default to zero
-      let priceChange = res.data[0].price_change_percentage_24h || 0 // Default to zero
-      let symbol = res.data[0].symbol || '?'
+    if(res.data && res.data.market_data.current_price.usd && res.data.market_data.price_change_percentage_24h) {
+      currentPrice = res.data.market_data.current_price.usd.toFixed(4) || 0 // Default to zero
+      let priceChange = res.data.market_data.price_change_percentage_24h || 0 // Default to zero
+      let symbol = res.data.symbol || '?'
       client.user.setPresence({
         activities: [{
           name: `24hr: ${priceChange.toFixed(2)}%`,
